@@ -16,9 +16,17 @@ const App: React.FC = () => {
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isApiConfigured, setIsApiConfigured] = useState(true);
 
   const chatContainerRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    // Check for API Key on mount
+    if (!process.env.API_KEY) {
+      setIsApiConfigured(false);
+    }
+  }, []);
 
   useEffect(() => {
     chatContainerRef.current?.scrollTo({
@@ -83,6 +91,27 @@ const App: React.FC = () => {
       setImageFile(file);
     }
   };
+  
+  if (!isApiConfigured) {
+    return (
+      <div className="flex justify-center items-center min-h-screen p-4">
+        <div className="w-full max-w-3xl h-[90vh] max-h-[800px] bg-white rounded-2xl shadow-2xl flex flex-col overflow-hidden items-center justify-center p-8 text-center">
+          <header className="w-full bg-gradient-to-r from-[#11998e] to-[#38ef7d] text-white p-6 text-center shadow-md animated-gradient rounded-t-2xl">
+            <h1 className="text-2xl font-bold">Multimodal Main</h1>
+          </header>
+          <div className="p-8">
+            <h2 className="text-2xl font-bold text-red-600 mb-4">Ошибка конфигурации</h2>
+            <p className="text-gray-700">
+              Ключ Gemini API не найден. Пожалуйста, добавьте переменную окружения <code className="bg-gray-200 text-red-700 font-mono p-1 rounded">API_KEY</code> в настройках вашего проекта на Vercel.
+            </p>
+            <p className="mt-4 text-sm text-gray-500">
+              После добавления ключа не забудьте сделать **Redeploy** (повторное развертывание), чтобы изменения вступили в силу.
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex justify-center items-center min-h-screen p-4">

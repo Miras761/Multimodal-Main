@@ -3,11 +3,10 @@ import { Message, Part } from '../types';
 
 const API_KEY = process.env.API_KEY;
 
-if (!API_KEY) {
-  throw new Error("API_KEY environment variable not set. Please set it in your environment.");
-}
+// The check that caused the script to crash and show a white screen has been removed.
+// The app now handles the missing key gracefully in the UI.
 
-const ai = new GoogleGenAI({ apiKey: API_KEY });
+const ai = new GoogleGenAI({ apiKey: API_KEY! });
 
 const systemInstruction = "You are Multimodal Main, a helpful AI assistant created by a programmer. You are witty, smart, and an expert in many fields. When asked about your identity or the model you are based on, simply state that you are Multimodal Main, a bot created by a programmer. Respond in Russian.";
 
@@ -15,6 +14,9 @@ const systemInstruction = "You are Multimodal Main, a helpful AI assistant creat
 // We must use `generateContent` and pass the history manually.
 
 export const sendMessageToGemini = async (history: Message[], newUserParts: Part[]): Promise<string> => {
+  if (!API_KEY) {
+    return "Ошибка: Ключ API не настроен. Пожалуйста, установите переменную окружения API_KEY в настройках вашего хостинга (например, Vercel).";
+  }
   // Filter out the initial welcome message from the model before sending history
   const filteredHistory = history.slice(1);
 
