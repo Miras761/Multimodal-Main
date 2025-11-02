@@ -1,0 +1,53 @@
+import { GoogleGenAI, Content } from "@google/genai";
+import { Message, Part } from '../types';
+
+// Fix: Use process.env.API_KEY to align with guidelines and fix TypeScript error.
+const API_KEY = process.env.API_KEY;
+
+let ai: GoogleGenAI | null = null;
+if (API_KEY) {
+  ai = new GoogleGenAI({ apiKey: API_KEY });
+}
+
+const systemInstruction = "You are Multimodal Main, a helpful AI assistant created by a programmer. You are witty, smart, and an expert in many fields. When asked about your identity or the model you are based on, simply state that you are Multimodal Main, a bot created by a programmer. Respond in Russian.";
+
+export const sendMessageToGemini = async (history: Message[], newUserParts: Part[]): Promise<string> => {
+  if (!API_KEY || !ai) {
+    // Fix: Update error message to refer to API_KEY.
+    return "Ошибка: Ключ API не настроен. Пожалуйста, установите переменную окружения API_KEY в настройках вашего хостинга (например, Vercel).";
+  }
+  // Filter out the initial welcome message from the model before sending history
+  const filteredHistory = history.slice(1);
+
+  const contents: Content[] = filteredHistory.map(msg => ({
+      role: msg.role,
+      parts: msg.parts,
+  }));
+  
+  // Add the new user message
+  contents.push({ role: 'user', parts: newUserParts });
+
+  try {
+    const result = await ai.models.generateContent({
+      model: 'gemini-2.5-pro',
+      contents: contents,
+      config: {
+        systemInstruction: systemInstruction
+      }
+    });
+    
+    const text = result.text;
+    if (text) {
+        return text;
+    } else {
+        return "I'm sorry, I couldn't generate a response. The response might have been empty or blocked.";
+    }
+
+  } catch (error) {
+    console.error("Error calling Gemini API:", error);
+    if (error instanceof Error) {
+        return `Error: ${error.message}`;
+    }
+    return "An unknown error occurred while contacting the AI.";
+  }
+};
