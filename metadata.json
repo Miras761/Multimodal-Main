@@ -1,0 +1,5 @@
+{
+  "name": "Multimodal Main Chatbot",
+  "description": "A multimodal chat application powered by the Gemini API, featuring a green, modern interface. The bot persona is 'Multimodal Main', an intelligent assistant created by a programmer.",
+  "requestFramePermissions": []
+}
